@@ -13,5 +13,5 @@ $conecta = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
     die("Não foi possivel conectar ao 
     Banco de Dados: " . $conecta->connect_error);
 }else{
-    echo "<h1>Conectou no BD Manowwwww!</h1>";
+   // echo "<h1>Conectou no BD Manowwwww!</h1>";
 }
