@@ -1,8 +1,10 @@
 <?php
 //Inicializando a sessão
 session_start();
+
 //É necessário fazer a conexão com o Banco de Dados
 require_once "configDB.php";
+
 function verificar_entrada($entrada)
 {
     $saida = trim($entrada); //Remove espaços antes e depois
@@ -10,33 +12,44 @@ function verificar_entrada($entrada)
     $saida = htmlspecialchars($saida);
     return $saida;
 }
-        if (
-        isset($_POST['action']) &&
-        $_POST['action'] == 'senha'{
-        //echo"<strong>Recuperação de senha</strong>;
-        $emailsenha = verificar_entrada($post('emailSenha'));
-        $sql = $conecta->prepare("SELECT idUsurario FROM usuario
-        WHERE email = ?");
-        $sql->bind_param("s", $emailSenha);
-        $sql->execute();
-        $resultado = $sql->get_result();
-        if($resultado->num_rows > 0){
-        //existe o usuario no banco de dados
-        //echo "<p class=\"text-sucess\">E-mail não encontrado</php>";
-        $frase ="Thiago é muito lindo";
-        $frase_secreta = str_shuffler($frase);
-        $token = subsrt($frase_secreta,0,10);
-        echo"<p>$token</p>;
-        
-        }else{
-            echo '<p class="text-danger">E-mail não encontrado</php>';
-        } 
 
-        }else if (
-        isset($_POST['action']) &&
-        $_POST['action'] == 'login'
-        )
-    {
+if (
+    isset($_POST['action']) &&
+    $_POST['action'] == 'senha'
+) {
+    //Apenas para Debug / Teste
+    //echo"<strong>Recuperação de senha</strong>";
+    $emailSenha = verificar_entrada($_POST['emailSenha']);
+    $sql = $conecta->prepare("SELECT idUsuario FROM usuario 
+        WHERE email = ?");
+    $sql->bind_param("s", $emailSenha);
+    $sql->execute();
+    $resultado = $sql->get_result();
+    if ($resultado->num_rows > 0) {
+        //Existe o usuário no Banco de Dados
+        //Só para testar / debug
+        //echo "<p class=\"text-success\">E-mail não encontrado</P>";
+        $frase = "BatAtinh4!@#$%NascexexEsparr4m4PeloChao&*";
+        $frase_secreta = str_shuffle($frase); //Embaralha a frase
+        $token = substr($frase_secreta, 0, 10); //10 primeiros caracteres
+        //echo "<p>$token</p>";
+        $sql = $conecta->prepare("UPDATE usuario SET token = ?,
+            tempo_de_vida = DATE_ADD(NOW(), INTERVAL 1 MINUTE) 
+            WHERE email = ?");
+        $sql->bind_param("ss", $token, $emailSenha);
+        $sql->execute();
+        //Criação do link para gerar nova senha
+        $link = "<a href=\"gerar_senha.php?token=$token\">
+            Clique aqui para gerar uma nova senha</a>";
+        //Este link deve ser enviado por e-mail
+        echo $link;
+    } else {
+        echo '<p class="text-danger">E-mail não encontrado</P> ';
+    }
+} else if (
+    isset($_POST['action']) &&
+    $_POST['action'] == 'login'
+) {
     //Verificação e Login do usuário
     $nomeUsuario = verificar_entrada($_POST['nomeUsuario']);
     $senhaUsuario = verificar_entrada($_POST['senhaUsuario']);
@@ -47,6 +60,7 @@ function verificar_entrada($entrada)
         nomeUsuario = ? AND senha = ?");
     $sql->bind_param("ss", $nomeUsuario, $senha);
     $sql->execute();
+
     $busca = $sql->fetch();
     if ($busca != null) {
         //Colocando o nome do usuário na Sessão
@@ -88,9 +102,11 @@ function verificar_entrada($entrada)
     //$concordar = $_POST['concordar'];
     $dataCriacao = date("Y-m-d H:i:s");
 
+
     //Hash de senha / Codificação de senha em 40 caracteres
     $senha = sha1($senhaUsuario);
     $senhaC = sha1($senhaConfirma);
+
     if ($senha != $senhaC) {
         echo "<h1>As senhas não conferem</h1>";
         exit();
@@ -110,8 +126,7 @@ function verificar_entrada($entrada)
             echo "<p>E-mail já em uso, tente outro</p>";
         } else { //Cadastro de usuário
             $sql = $conecta->prepare("INSERT into usuario 
-            (nome, nomeUsuario, email, senha, dataCriacao, 
-            avatar_url) 
+            (nome, nomeUsuario, email, senha, dataCriacao, avatar_url) 
             values(?, ?, ?, ?, ?, ?)");
             $sql->bind_param(
                 "ssssss",
