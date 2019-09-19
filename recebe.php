@@ -10,10 +10,33 @@ function verificar_entrada($entrada)
     $saida = htmlspecialchars($saida);
     return $saida;
 }
-if (
-    isset($_POST['action']) &&
-    $_POST['action'] == 'login'
-) {
+        if (
+        isset($_POST['action']) &&
+        $_POST['action'] == 'senha'{
+        //echo"<strong>Recuperação de senha</strong>;
+        $emailsenha = verificar_entrada($post('emailSenha'));
+        $sql = $conecta->prepare("SELECT idUsurario FROM usuario
+        WHERE email = ?");
+        $sql->bind_param("s", $emailSenha);
+        $sql->execute();
+        $resultado = $sql->get_result();
+        if($resultado->num_rows > 0){
+        //existe o usuario no banco de dados
+        //echo "<p class=\"text-sucess\">E-mail não encontrado</php>";
+        $frase ="Thiago é muito lindo";
+        $frase_secreta = str_shuffler($frase);
+        $token = subsrt($frase_secreta,0,10);
+        echo"<p>$token</p>;
+        
+        }else{
+            echo '<p class="text-danger">E-mail não encontrado</php>';
+        } 
+
+        }else if (
+        isset($_POST['action']) &&
+        $_POST['action'] == 'login'
+        )
+    {
     //Verificação e Login do usuário
     $nomeUsuario = verificar_entrada($_POST['nomeUsuario']);
     $senhaUsuario = verificar_entrada($_POST['senhaUsuario']);
